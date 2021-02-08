@@ -1,0 +1,13 @@
+﻿version: "3"
+services:
+  front:
+    image: selenium/standalone-chrome
+    # volumes:
+    #   - ./:/usr/src
+    #   - front_modules:/usr/src/node_modules #node_modulesはコンテナ内部で用意します
+    # working_dir: "/usr/src"
+    # command: sh -c "yarn install && yarn start"
+    ports:
+      - "4444:4444"
+# volumes:
+#   front_modules:
