@@ -1,13 +1,29 @@
 ﻿version: "3"
 services:
   front:
+    image: node:14.15.4-buster-slim
+    volumes:
+      - ./front:/usr/src
+      - front_modules:/usr/src/node_modules #node_modulesはコンテナ内部で用意します
+    working_dir: "/usr/src"
+    command: sh -c "yarn install && yarn start"
+    ports:
+      - "80:3000"
+  api:
+    image: node:14.15.4-buster-slim
+    volumes:
+      - ./api/:/usr/src/
+      - api_modules:/usr/src/node_modules #node_modulesはコンテナ内部で用意します
+    working_dir: "/usr/src"
+    ports:
+      - "3000:3000"
+    command: sh -c "yarn install && yarn dev"
+    depends_on:
+      - selenium
+  selenium:
     image: selenium/standalone-chrome
-    # volumes:
-    #   - ./:/usr/src
-    #   - front_modules:/usr/src/node_modules #node_modulesはコンテナ内部で用意します
-    # working_dir: "/usr/src"
-    # command: sh -c "yarn install && yarn start"
     ports:
       - "4444:4444"
-# volumes:
-#   front_modules:
+volumes:
+  front_modules:
+  api_modules:
