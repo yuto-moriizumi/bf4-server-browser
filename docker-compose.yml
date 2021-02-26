@@ -9,6 +9,8 @@ services:
     command: sh -c "yarn install && yarn start"
     ports:
       - "80:3000"
+    environment:
+      REACT_APP_SERVER_URL: "http://localhost:3000"
   api:
     image: node:14.15.4-buster-slim
     volumes:
@@ -20,6 +22,8 @@ services:
     command: sh -c "yarn install && yarn dev"
     depends_on:
       - selenium
+    environment:
+      CLIENT_ORIGIN_URL: "http://localhost"
   selenium:
     image: selenium/standalone-chrome
     ports:

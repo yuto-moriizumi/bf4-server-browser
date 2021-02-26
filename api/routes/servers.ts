@@ -1,5 +1,6 @@
 import express from "express";
-import { Builder, By, Key, until } from "selenium-webdriver";
+import { Builder, By, Key, until, WebDriver } from "selenium-webdriver";
+import { Options } from "selenium-webdriver/chrome";
 
 const router = express.Router();
 
@@ -8,6 +9,7 @@ router.get("/", async (req, res) => {
   const driver = await new Builder()
     .forBrowser("chrome")
     .usingServer("http://selenium:4444/wd/hub")
+    .setChromeOptions(new Options().addArguments("--headless"))
     .build();
   try {
     await driver.get(
@@ -24,9 +26,9 @@ router.get("/", async (req, res) => {
           const texts = (await el.getText()).split("\n");
           return {
             guid: guid,
-            img: await (await el.findElement(By.xpath("//td/div/img"))).getAttribute(
-              "src"
-            ),
+            img: await (
+              await el.findElement(By.xpath("td/div[@class='map-thumb']/img"))
+            ).getAttribute("src"),
             name: texts[0],
             details: texts[1],
             players: texts[2].slice(0, -2),
@@ -46,30 +48,38 @@ router.get("/", async (req, res) => {
 //サーバのチームとチケット数を返す
 router.get("/:guid", async (req, res) => {
   const guid = req.params.guid;
-  console.log(`######## ${guid}`);
-
-  const driver = await new Builder()
-    .forBrowser("chrome")
-    .usingServer("http://selenium:4444/wd/hub")
-    .build();
+  let driver: WebDriver | null = null;
   try {
+    driver = await new Builder()
+      .forBrowser("chrome")
+      .usingServer("http://selenium:4444/wd/hub")
+      .setChromeOptions(
+        new Options().addArguments("headless", "no-sandbox", "disable-dev-shm-usage")
+      )
+      .build();
     await driver.get(`https://battlelog.battlefield.com/bf4/ja/servers/show/pc/${guid}`);
+    // await driver.wait(until.elementLocated(By.xpath("/html")), 5000);
+    await driver.wait(until.elementLocated(By.id("live-header")), 5000);
     const scores = (
       await Promise.all(
-        (await driver.findElements(By.xpath("//th[@colspan='2']"))).map(
-          async (el) => await el.getText()
-        )
+        //colspan=2属性のあるthに「US - 6」形式でチーム名とチケット数があるので、それを取得して配列にする
+        (await driver.findElements(By.xpath("//th[@colspan='2']"))).map(async (el) => {
+          return await el.getText();
+        })
       )
     ).map((score) => {
+      console.log(score);
+      //仮引数のscoreは「US - 6」形式
       const text_parts = score.split(" - ");
       return { name: text_parts[0], ticket: parseInt(text_parts[1]) };
     });
+    // const scores = "aaa";
     res.send(scores);
   } catch (err) {
     console.log(err);
-    res.status(500).send();
+    res.status(500).send(err);
   } finally {
-    await driver.quit();
+    if (driver) await driver.quit();
   }
 });
 
