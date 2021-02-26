@@ -52,7 +52,7 @@ router.get("/:guid", async (req, res) => {
   try {
     driver = await new Builder()
       .forBrowser("chrome")
-      .usingServer("http://seleniumhub:4444/wd/hub")
+      .usingServer("http://selenium:4444")
       .setChromeOptions(
         new Options().addArguments(
           "headless", //ヘッドレスの方が早い
@@ -64,8 +64,12 @@ router.get("/:guid", async (req, res) => {
       .build();
     console.log("buiid success");
     await driver.get(`https://battlelog.battlefield.com/bf4/ja/servers/show/pc/${guid}`);
-    // await driver.wait(until.elementLocated(By.xpath("/html")), 5000);
-    await driver.wait(until.elementLocated(By.id("live-header")), 6000);
+    await driver.wait(until.elementLocated(By.id("serverbrowser-scoreboard")), 6000);
+    await driver.wait(until.elementLocated(By.id("live-header")), 500);
+    // await driver.findElement(
+    //   By.xpath("//div[contains(text(), 'ラウンドはまだ開始していません')]")
+    // );
+
     const scores = (
       await Promise.all(
         //colspan=2属性のあるthに「US - 6」形式でチーム名とチケット数があるので、それを取得して配列にする
@@ -83,7 +87,7 @@ router.get("/:guid", async (req, res) => {
     res.send(scores);
   } catch (err) {
     console.log(err);
-    res.status(500).send(err);
+    res.send([]);
   } finally {
     if (driver) await driver.quit();
   }

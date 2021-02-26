@@ -30,8 +30,8 @@ export default class App extends React.Component<{}, State> {
     try {
       const res = await axios.get(`${this.SERVER_HOST}/servers`);
       if (res) this.setState({ servers: res.data });
-      for await (const server of this.state.servers) {
-        await axios
+      this.state.servers.forEach((server) => {
+        axios
           .get(`${this.SERVER_HOST}/servers/${server.guid}`)
           .catch((e) => console.log(e))
           .then((res) => {
@@ -45,7 +45,7 @@ export default class App extends React.Component<{}, State> {
               }),
             });
           });
-      }
+      });
     } catch (error) {
       console.log(error);
     } finally {

@@ -21,14 +21,15 @@ services:
       - "3000:3000"
     command: sh -c "yarn install && yarn dev"
     depends_on:
-      - seleniumhub
+      - selenium
     environment:
       CLIENT_ORIGIN_URL: "http://localhost"
-  seleniumhub:
-    image: selenium/standalone-chrome
+
+  selenium:
+    image: selenium/standalone-chrome:88.0
     ports:
       - "4444:4444"
-    shm_size: 2gb
+    # shm_size: 2gb
 
   # chrome:
   #   image: selenium/node-chrome:4.0.0-beta-1-20210215
