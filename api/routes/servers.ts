@@ -52,7 +52,7 @@ router.get("/:guid", async (req, res) => {
   try {
     driver = await new Builder()
       .forBrowser("chrome")
-      .usingServer("http://selenium:4444/wd/hub")
+      .usingServer("http://seleniumhub:4444/wd/hub")
       .setChromeOptions(
         new Options().addArguments(
           "headless", //ヘッドレスの方が早い
@@ -62,6 +62,7 @@ router.get("/:guid", async (req, res) => {
         )
       )
       .build();
+    console.log("buiid success");
     await driver.get(`https://battlelog.battlefield.com/bf4/ja/servers/show/pc/${guid}`);
     // await driver.wait(until.elementLocated(By.xpath("/html")), 5000);
     await driver.wait(until.elementLocated(By.id("live-header")), 6000);
