@@ -31,16 +31,20 @@ export default class App extends React.Component<{}, State> {
       const res = await axios.get(`${this.SERVER_HOST}/servers`);
       if (res) this.setState({ servers: res.data });
       for await (const server of this.state.servers) {
-        const res = (await axios
+        await axios
           .get(`${this.SERVER_HOST}/servers/${server.guid}`)
-          .catch((e) => console.log(e))) as { data: any };
-        console.log(res.data);
-        this.setState({
-          servers: this.state.servers.map((server2) => {
-            if (server2 === server) server2.teams = res.data;
-            return server2;
-          }),
-        });
+          .catch((e) => console.log(e))
+          .then((res) => {
+            const res2 = res as { data: any };
+            if (res2 === undefined) return;
+            console.log(res2.data);
+            this.setState({
+              servers: this.state.servers.map((server2) => {
+                if (server2 === server) server2.teams = res2.data;
+                return server2;
+              }),
+            });
+          });
       }
     } catch (error) {
       console.log(error);

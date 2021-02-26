@@ -54,12 +54,17 @@ router.get("/:guid", async (req, res) => {
       .forBrowser("chrome")
       .usingServer("http://selenium:4444/wd/hub")
       .setChromeOptions(
-        new Options().addArguments("headless", "no-sandbox", "disable-dev-shm-usage")
+        new Options().addArguments(
+          "headless", //ヘッドレスの方が早い
+          "no-sandbox", //なんだっけ
+          "disable-dev-shm-usage", //docker使用時メモリ割り当てが少なくてもなんとかする
+          "user-agent=hogehoge" //UA確認で時間取られるのを防ぐ
+        )
       )
       .build();
     await driver.get(`https://battlelog.battlefield.com/bf4/ja/servers/show/pc/${guid}`);
     // await driver.wait(until.elementLocated(By.xpath("/html")), 5000);
-    await driver.wait(until.elementLocated(By.id("live-header")), 5000);
+    await driver.wait(until.elementLocated(By.id("live-header")), 6000);
     const scores = (
       await Promise.all(
         //colspan=2属性のあるthに「US - 6」形式でチーム名とチケット数があるので、それを取得して配列にする
