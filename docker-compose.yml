@@ -10,7 +10,7 @@ services:
     ports:
       - "80:3000"
     environment:
-      REACT_APP_SERVER_URL: "http://localhost:3000"
+      REACT_APP_SERVER_URL: "http://localhost:3000" #バックエンドAPIを叩くときに使う
   api:
     image: node:14.15.4-buster-slim
     volumes:
@@ -20,15 +20,58 @@ services:
     ports:
       - "3000:3000"
     command: sh -c "yarn install && yarn dev"
-    depends_on:
-      - selenium
+    # depends_on:
+    #   - selenium
     environment:
-      CLIENT_ORIGIN_URL: "http://localhost"
+      CLIENT_ORIGIN_URL: "http://localhost" #CORS許可に使う
+      SELENIUM_HOST: "http://selenium:4444" #Selenium使う時に使う 13.230.136.208
+      # SELENIUM_HOST: "http://ec2-35-160-223-155.us-west-2.compute.amazonaws.com:4444" #Selenium使う時に使う
+      # SELENIUM_HOST: "http://3.113.247.54:4444" #Selenium使う時に使う
+      # SELENIUM_HOST: "http://35.72.180.5:4444" #Selenium使う時に使う
 
   selenium:
     image: selenium/standalone-chrome:88.0
+    # volumes:
+    #   - /dev/shm:/dev/shm
     ports:
       - "4444:4444"
+    # environment:
+    # shm-size: "512m"
+    # GRID_MAX_SESSION: 10
+
+  # selenium:
+  #   image: selenium/hub:4
+  #   container_name: selenium #hubです
+  #   ports:
+  #     - "4442:4442"
+  #     - "4443:4443"
+  #     - "4444:4444"
+
+  # selenium-worker-1:
+  #   image: selenium/node-chrome:88.0
+  #   volumes:
+  #     - /dev/shm:/dev/shm
+  #   depends_on:
+  #     - selenium
+  #   environment:
+  #     - SE_EVENT_BUS_HOST=selenium
+  #     - SE_EVENT_BUS_PUBLISH_PORT=4442
+  #     - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  #   ports:
+  #     - "6900:5900"
+
+  # selenium-worker-2:
+  #   image: selenium/node-chrome:88.0
+  #   volumes:
+  #     - /dev/shm:/dev/shm
+  #   depends_on:
+  #     - selenium
+  #   environment:
+  #     - SE_EVENT_BUS_HOST=selenium
+  #     - SE_EVENT_BUS_PUBLISH_PORT=4442
+  #     - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  #   ports:
+  #     - "6901:5900"
 
 volumes:
   front_modules:
